@@ -1,0 +1,9 @@
+# Ignore idea files
+.idea
+# Ignore node_modules and package-lock.json for saving space
+node_modules
+package-lock.json
+# Ignore test
+tests
+# Ignore old README
+README copy.md
