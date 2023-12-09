@@ -5,7 +5,7 @@ const fs = require('fs'); // Require the 'fs' module to work with files
 
 // Upload data
 const uploadVehicleData = async (req, res) => {
-    const {vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time} = req.body
+    const {vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time, hydrogenFuel } = req.body
 
     // Add data to DB
     try {
@@ -19,6 +19,7 @@ const uploadVehicleData = async (req, res) => {
             fuelLevel,
             flowrate,
             time,
+            hydrogenFuel,
         })
         res.status(200).json(vehicleData)
     } catch (error) {
@@ -38,7 +39,7 @@ const uploadManyVehicleData = async (req, res) => {
         const insertedData = [];
 
         for (const data of dataToInsert) {
-            const { vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time } = data;
+            const { vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time, hydrogenFuel } = data;
 
             // Add data to DB
             const vehicleData = await VehicleData.create({
@@ -51,6 +52,7 @@ const uploadManyVehicleData = async (req, res) => {
                 fuelLevel,
                 flowrate,
                 time,
+                hydrogenFuel,
             });
 
             insertedData.push(vehicleData);
@@ -73,7 +75,7 @@ const uploadVehicleDataFile = async (req, res) => {
         // Parse the JSON data from the file
         const jsonData = JSON.parse(fileData)
 
-        const { vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time } = jsonData
+        const { vehicleName, vehicleID, mpg, CO, NOx, particulateMatter, fuelLevel, flowrate, time, hydrogenFuel } = jsonData
 
         // Add data to DB
         const vehicleData = await VehicleData.create({
@@ -86,6 +88,7 @@ const uploadVehicleDataFile = async (req, res) => {
             fuelLevel,
             flowrate,
             time,
+            hydrogenFuel,
         })
 
         res.status(200).json(vehicleData)
@@ -112,7 +115,7 @@ const getDataPoint = async (req, res) => {
     res.status(200).json(vehicleData)
 }
 
-// Delete data---------------
+// Delete data
 const deleteDataPoint = async (req, res) => {
     const { id } = req.params
 
@@ -169,22 +172,34 @@ const getVehicles = async (req, res) => {
     }
 }
 
-// The following functions accept an optional vehicleID parameter with which to filter
+// The following functions accept optional vehicleID and hydrogenFuel parameters with which to filter
 
 // Get all data
 const getAllData = async (req, res) => {
     const vehicleID = req.query.vehicleID;
-    const filter = vehicleID ? { vehicleID } : {};
+    const hydrogenFuel = req.query.hydrogenFuel;
+    const filter = {
+        $and: [
+            vehicleID ? { vehicleID } : {},
+            hydrogenFuel ? { hydrogenFuel } : {}
+        ]
+    };
 
-    const vehicleData = await VehicleData.find(filter).sort({createdAt: -1})
+    const vehicleData = await VehicleData.find(filter).sort({createdAt: -1});
 
-    res.status(200).json(vehicleData) 
+    res.status(200).json(vehicleData);
 }
 
 // Delete all data
 const deleteAllData = async (req, res) => {
     const vehicleID = req.query.vehicleID;
-    const filter = vehicleID ? { vehicleID } : {};
+    const hydrogenFuel = req.query.hydrogenFuel;
+    const filter = {
+        $and: [
+            vehicleID ? { vehicleID } : {},
+            hydrogenFuel ? { hydrogenFuel } : {}
+        ]
+    };
     try {
         const vehicleData = await VehicleData.deleteMany(filter);
         res.status(200).json({ message: `${vehicleData.deletedCount} data points deleted` });
@@ -196,7 +211,13 @@ const deleteAllData = async (req, res) => {
 // Get latest single data point
 const getLatestDataPoint = async (req, res) => {
     const vehicleID = req.query.vehicleID;
-    const filter = vehicleID ? { vehicleID } : {};
+    const hydrogenFuel = req.query.hydrogenFuel;
+    const filter = {
+        $and: [
+            vehicleID ? { vehicleID } : {},
+            hydrogenFuel ? { hydrogenFuel } : {}
+        ]
+    };
 
     const vehicleData = await VehicleData.findOne(filter).sort({time: -1});
 
@@ -211,7 +232,13 @@ const getLatestDataPoint = async (req, res) => {
 const getNLatestData = async (req, res) => {
     const N = req.params.N
     const vehicleID = req.query.vehicleID;
-    const filter = vehicleID ? { vehicleID } : {};
+    const hydrogenFuel = req.query.hydrogenFuel;
+    const filter = {
+        $and: [
+            vehicleID ? { vehicleID } : {},
+            hydrogenFuel ? { hydrogenFuel } : {}
+        ]
+    };
 
     const vehicleData = await VehicleData.find(filter).sort({createdAt: -1}).limit(parseInt(N))
 
@@ -224,39 +251,43 @@ const getNLatestData = async (req, res) => {
 
 // Get sorted data by date/time
 const getTimedData = async (req, res) => {
-    const time = req.params.time;
-    const vehicleID = req.query.vehicleID;
-    const filter = {
-      $and: [
-        { createdAt: new Date(time) },
-        { vehicleID: vehicleID ? { vehicleID } : {} },
-      ],
-    };
+        const time = req.params.time;
+        const vehicleID = req.query.vehicleID;
+        const hydrogenFuel = req.query.hydrogenFuel; 
+        const filter = {
+            $and: [
+                { createdAt: new Date(time) },
+                { vehicleID: vehicleID ? { vehicleID } : {} },
+                { hydrogenFuel: hydrogenFuel ? { hydrogenFuel } : {} }, 
+            ],
+        };
 
-    const vehicleData = await VehicleData.findOne(filter)
+        const vehicleData = await VehicleData.findOne(filter)
 
-    if (!vehicleData) {
-        return res.status(404).json({error: 'Specified data not found'})
-    }
+        if (!vehicleData) {
+                return res.status(404).json({error: 'Specified data not found'})
+        }
 
-    res.status(200).json(vehicleData)
+        res.status(200).json(vehicleData)
 }
 
 // Get sorted data by a date/time range
 const getTimedDataRange = async (req, res) => {
     const { startTime, endTime } = req.params;
     const vehicleID = req.query.vehicleID;
+    const hydrogenFuel = req.query.hydrogenFuel;
     const filter = {
-		$and: [
-			{
-				createdAt: {
-					$gte: new Date(startTime), // Greater than or equal to startTime
-					$lte: new Date(endTime), // Less than or equal to endTime
-				},
-			},
-			{ vehicleID: vehicleID ? { vehicleID } : {} },
-		],
-	};
+        $and: [
+            {
+                createdAt: {
+                    $gte: new Date(startTime), // Greater than or equal to startTime
+                    $lte: new Date(endTime), // Less than or equal to endTime
+                },
+            },
+            { vehicleID: vehicleID ? { vehicleID } : {} },
+            { hydrogenFuel: hydrogenFuel ? { hydrogenFuel } : {} },
+        ],
+    };
 
     const vehicleData = await VehicleData.find(filter);
 
@@ -277,6 +308,7 @@ const getTimedDataStart = async (req, res) => {
     const startTimeDate = new Date(startTime);
 
     const vehicleID = req.query.vehicleID;
+    const hydrogenFuel = req.query.hydrogenFuel;
 
     let filter = {
 		createdAt: {
@@ -285,7 +317,11 @@ const getTimedDataStart = async (req, res) => {
 	};
 
 	if (vehicleID) {
-		filter.vehicleID = vehicleID ;
+		filter.vehicleID = vehicleID;
+	}
+
+    if (hydrogenFuel) {
+		filter.hydrogenFuel = hydrogenFuel;
 	}
 
     const vehicleData = await VehicleData.find(filter);
@@ -301,7 +337,13 @@ const getTimedDataStart = async (req, res) => {
 // Get latest Fuel Level data point
 const getLatestFuelLevelData = async (req, res) => {
     const vehicleID = req.query.vehicleID;
-    const filter = vehicleID ? { vehicleID } : {};
+    const hydrogenFuel = req.query.hydrogenFuel;
+    const filter = {
+        $and: [
+            vehicleID ? { vehicleID } : {},
+            hydrogenFuel ? { hydrogenFuel } : {}
+        ]
+    };
 
     const fuelLevelData = await VehicleData.findOne(filter).sort({ time: -1 }).select('fuelLevel time');
 

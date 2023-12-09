@@ -38,6 +38,11 @@ const vehicleDataSchema = new Schema({
     time: {
         type: Date,
         required: true
+    },
+    hydrogenFuel: {
+        type: Boolean,
+        require: true,
+        default: true
     }
 
 }, { timestamps: true })
@@ -53,6 +58,11 @@ const aggregateDataSchema = new Schema({
     vehicleID: {
         type: String,
         require: true
+    },
+    hydrogenFuel: {
+        type: Boolean,
+        require: true,
+        default: true
     },
 
     mpg: Number,
