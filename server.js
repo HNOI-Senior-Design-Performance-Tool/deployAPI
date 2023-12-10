@@ -20,12 +20,21 @@ const aggregateDataRoutes = require('./routes/aggregateData')
 
 
 app.use(
-    // allow CORS from hnoi.netlify.app and localhost:3000
+    // allow CORS from hnoi.netlify.app
     cors({
-        origin: ["http://hnoi.netlify.app", "http://localhost:3000"],
+        origin: ["http://hnoi.netlify.app"],
         credentials: true,
     })
 );
+
+// Add headers
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow any origin to access the server
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // Allow these HTTP methods
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type'); // Allow these headers
+  res.setHeader('Access-Control-Allow-Credentials', true); // Allow cookies
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -53,7 +62,7 @@ mongoose.connect('mongodb+srv://admin:admin@seniordesigndb.2hphwnj.mongodb.net/?
 mongoose.connection.on('error', console.error.bind(console, 'HNO Database Connection Error:'));
 mongoose.connection.once('connected', () => {console.log('HNO Database Connected')});
 
-app.listen(8080, () => console.log('API is running on http://localhost:8080/'))
+app.listen(8080, () => console.log('API is running'))
 
 //const scheduledTask = require('./schedulers/avgData')
 
