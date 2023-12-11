@@ -206,7 +206,10 @@ const aggregateData = async (req, res) => {
 		})
 	);
 
-	res.status(200).json({ message: "Data Aggregated Successfully" });
+	// Delete all vehicleData
+	const deletedVehicleData = await VehicleData.deleteMany({});
+
+	res.status(200).json({ message: `${deletedVehicleData.deletedCount} Data Points Aggregated Successfully` });
 	console.log("Data Aggregated Successfully");
 };
 
