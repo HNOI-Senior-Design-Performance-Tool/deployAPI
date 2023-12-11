@@ -20,11 +20,11 @@ const aggregateDataRoutes = require('./routes/aggregateData')
 
 
 app.use(
-    // allow CORS from hnoi.netlify.app
-    cors({
-        origin: ["http://hnoi.netlify.app"],
-        credentials: true,
-    })
+	// allow CORS from hnoi.netlify.app
+	cors({
+		origin: ["http://hnoi.netlify.app", "http://hnoi.netlify.app/"],
+		credentials: true,
+	})
 );
 
 // Add headers
