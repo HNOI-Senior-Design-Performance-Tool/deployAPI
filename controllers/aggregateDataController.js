@@ -5,9 +5,16 @@ const mongoose = require("mongoose");
 const getAvgData = async (req, res) => {
 	const vehicleID = req.query.vehicleID;
 	const hydrogenFuel = req.query.hydrogenFuel;
-	const filter = {
-		$and: [{ vehicleID: vehicleID ? { vehicleID } : {} }, { hydrogenFuel: hydrogenFuel ? { hydrogenFuel } : {} }],
-	};
+
+	let filter = {};
+
+	if (vehicleID) {
+		filter.vehicleID = vehicleID;
+	}
+
+	if (hydrogenFuel) {
+		filter.hydrogenFuel = hydrogenFuel;
+	}
 
 	const avgData = await AvgData.find(filter).sort({ createdAt: -1 });
 
@@ -23,9 +30,16 @@ const getAvgData = async (req, res) => {
 const getSumData = async (req, res) => {
 	const vehicleID = req.query.vehicleID;
 	const hydrogenFuel = req.query.hydrogenFuel;
-	const filter = {
-		$and: [{ vehicleID: vehicleID ? { vehicleID } : {} }, { hydrogenFuel: hydrogenFuel ? { hydrogenFuel } : {} }],
-	};
+
+	let filter = {};
+
+	if (vehicleID) {
+		filter.vehicleID = vehicleID;
+	}
+
+	if (hydrogenFuel) {
+		filter.hydrogenFuel = hydrogenFuel;
+	}
 
 	const sumData = await SumData.find(filter).sort({ createdAt: -1 });
 
